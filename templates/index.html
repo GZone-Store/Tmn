@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รับซองทรูมันนี่</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; background: #fefefe; }
+    input[type=text] { padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: 10px 20px; background: #f60; color: white; border: none; border-radius: 5px; }
+    .result { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>วางลิงก์ซองทรูมันนี่</h1>
+  <form method="POST" action="/redeem">
+    <input type="text" name="link" placeholder="https://gift.truemoney.com/campaign/xxxxxx" required>
+    <button type="submit">รับซอง</button>
+  </form>
+
+  {% if result %}
+    <div class="result" style="color: {% if result.status == 'success' %}green{% else %}red{% endif %};">
+      {{ result.message }}
+    </div>
+  {% endif %}
+</body>
+</html>
