@@ -1,128 +1,91 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GZONE AD</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>โฆษณา</title>
   <style>
-    body {
+    body, html {
       margin: 0;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      padding: 0;
+      background: black;
+      height: 100%;
       overflow: hidden;
     }
     #ad-container {
       position: relative;
-      width: 380px;
-      height: 670px;
-      background: #000;
-      overflow: hidden;
-      border-radius: 12px;
+      width: 100%;
+      height: 100vh;
     }
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      pointer-events: none;
     }
     #skip-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.6);
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
       color: white;
+      padding: 10px 15px;
       border: none;
-      border-radius: 50%;
-      padding: 5px 12px;
-      font-size: 20px;
+      border-radius: 5px;
       cursor: pointer;
-      z-index: 10;
       display: none;
-      font-weight: bold;
+      z-index: 10;
+      font-size: 16px;
     }
     #countdown {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 20px;
+      left: 20px;
       color: white;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 5px 12px;
-      border-radius: 20px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 12px;
+      border-radius: 5px;
       font-size: 14px;
       z-index: 10;
-    }
-    #popup {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 18px;
-      width: 70%;
-    }
-    #popup button {
-      background: #f00;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div id="ad-container">
-    <video id="ad-video" autoplay playsinline>
-      <source src="gzone-ad1.mp4" type="video/mp4">
-      Your browser does not support the video tag.
+    <video id="ad-video" autoplay muted playsinline>
+      <source src="gzone-ad1.mp4" type="video/mp4" />
+      วิดีโอของคุณไม่สามารถเล่นได้
     </video>
-    <div id="countdown">0</div>
-    <button id="skip-btn">×</button>
-    <div id="popup">
-      <button onclick="window.location.href='https://your-link-here.com'">ดูข้อมูลเพิ่มเติม</button>
-    </div>
+    <div id="countdown">กำลังโหลด...</div>
+    <button id="skip-btn" onclick="skipAd()">× ข้ามโฆษณา</button>
   </div>
+
   <script>
     const video = document.getElementById('ad-video');
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
-    const popup = document.getElementById('popup');
 
-    video.addEventListener('loadedmetadata', () => {
-      let duration = Math.floor(video.duration);
-      countdown.textContent = duration;
+    video.onloadedmetadata = function () {
+      let duration = Math.floor(video.duration); // วินาที
+      let timeLeft = duration;
 
-      const countdownInterval = setInterval(() => {
-        const timeLeft = Math.ceil(video.duration - video.currentTime);
-        countdown.textContent = timeLeft > 0 ? timeLeft : '';
+      countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
 
-        if (video.ended || timeLeft <= 1) {
-          clearInterval(countdownInterval);
+      const timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
           countdown.style.display = 'none';
           skipBtn.style.display = 'block';
-          setTimeout(() => {
-            popup.style.display = 'block';
-          }, 500); // ป๊อปอัพแสดงหลังจากวิดีโอจบ
+        } else {
+          countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
         }
-      }, 500);
-    });
+      }, 1000);
+    };
 
-    skipBtn.addEventListener('click', () => {
-      window.location.href = "https://your-link-here.com"; // ปรับลิงก์ปลายทางที่ต้องการได้เลย
-    });
-
-    video.play().catch(error => {
-      console.warn("วิดีโอไม่สามารถเล่นอัตโนมัติได้: ", error);
-    });
+    function skipAd() {
+      window.location.href = "hnungh.com"; // เปลี่ยนลิงก์ปลายทางที่นี่
+    }
   </script>
 </body>
 </html>
