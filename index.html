@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="th">
+<!DOCTYPE html>
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,18 +27,24 @@
       height: 100%;
       object-fit: cover;
     }
-    #mute-btn {
+    #mute-btn, #fullscreen-btn {
       position: absolute;
       top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       border: none;
       border-radius: 50%;
       padding: 10px;
       cursor: pointer;
       z-index: 10;
+      transition: all 0.3s ease;
     }
-    #mute-btn svg {
+    #mute-btn {
+      left: 10px;
+    }
+    #fullscreen-btn {
+      right: 10px;
+    }
+    #mute-btn svg, #fullscreen-btn svg {
       width: 28px;
       height: 28px;
       fill: white;
@@ -55,17 +62,27 @@
       cursor: pointer;
       z-index: 10;
       display: none;
+      transition: opacity 0.3s ease;
     }
     #countdown {
       position: absolute;
       top: 10px;
       right: 10px;
       color: white;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 14px;
       z-index: 10;
+    }
+    #progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 5px;
+      background-color: #f00;
+      width: 0;
+      transition: width 0.5s ease;
     }
   </style>
 </head>
@@ -80,14 +97,23 @@
         <path d="M3 9v6h4l5 5V4L7 9H3z" />
       </svg>
     </button>
+    <button id="fullscreen-btn">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h6v6H3zm18 0h-6v6h6zm-6 18h6v-6h-6zm-12 0h6v-6H3z" />
+      </svg>
+    </button>
     <div id="countdown">0</div>
     <button id="skip-btn">×</button>
-  </div>  <script>
+    <div id="progress-bar"></div>
+  </div>
+  <script>
     const video = document.getElementById('ad-video');
     const muteBtn = document.getElementById('mute-btn');
     const volumeIcon = document.getElementById('volume-icon');
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
+    const progressBar = document.getElementById('progress-bar');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
 
     video.addEventListener('loadedmetadata', () => {
       let duration = Math.floor(video.duration);
@@ -96,6 +122,9 @@
       const countdownInterval = setInterval(() => {
         const timeLeft = Math.ceil(video.duration - video.currentTime);
         countdown.textContent = timeLeft > 0 ? timeLeft : '';
+
+        // Update progress bar
+        progressBar.style.width = `${(video.currentTime / video.duration) * 100}%`;
 
         if (video.ended || timeLeft <= 1) {
           clearInterval(countdownInterval);
@@ -116,8 +145,19 @@
       window.location.href = "https://your-link-here.com"; // ปรับลิงก์ปลายทางที่ต้องการได้เลย
     });
 
+    fullscreenBtn.addEventListener('click', () => {
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.mozRequestFullScreen) {
+        video.mozRequestFullScreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      }
+    });
+
     video.play().catch(error => {
       console.warn("วิดีโอไม่สามารถเล่นอัตโนมัติได้: ", error);
     });
-  </script></body>
+  </script>
+</body>
 </html>
