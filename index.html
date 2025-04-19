@@ -15,8 +15,8 @@
     }
     #ad-container {
       position: relative;
-      width: 360px;
-      height: 640px;
+      width: 380px;
+      height: 670px;
       background: #000;
       overflow: hidden;
       border-radius: 12px;
@@ -38,8 +38,8 @@
       z-index: 10;
     }
     #mute-btn svg {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       fill: white;
     }
     #skip-btn {
@@ -49,9 +49,9 @@
       background: rgba(0,0,0,0.6);
       color: white;
       border: none;
-      border-radius: 20px;
+      border-radius: 50%;
       padding: 5px 12px;
-      font-size: 14px;
+      font-size: 20px;
       cursor: pointer;
       z-index: 10;
       display: none;
@@ -80,7 +80,7 @@
         <path d="M3 9v6h4l5 5V4L7 9H3z" />
       </svg>
     </button>
-    <div id="countdown">8</div>
+    <div id="countdown">0</div>
     <button id="skip-btn">×</button>
   </div>  <script>
     const video = document.getElementById('ad-video');
@@ -89,18 +89,21 @@
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
 
-    let duration = 8;
-    countdown.textContent = duration;
+    video.addEventListener('loadedmetadata', () => {
+      let duration = Math.floor(video.duration);
+      countdown.textContent = duration;
 
-    const countdownInterval = setInterval(() => {
-      duration--;
-      countdown.textContent = duration > 0 ? duration : '';
-      if (duration <= 0) {
-        clearInterval(countdownInterval);
-        countdown.style.display = 'none';
-        skipBtn.style.display = 'block';
-      }
-    }, 1000);
+      const countdownInterval = setInterval(() => {
+        const timeLeft = Math.ceil(video.duration - video.currentTime);
+        countdown.textContent = timeLeft > 0 ? timeLeft : '';
+
+        if (video.ended || timeLeft <= 1) {
+          clearInterval(countdownInterval);
+          countdown.style.display = 'none';
+          skipBtn.style.display = 'block';
+        }
+      }, 500);
+    });
 
     muteBtn.addEventListener('click', () => {
       video.muted = !video.muted;
@@ -110,8 +113,7 @@
     });
 
     skipBtn.addEventListener('click', () => {
-      // ดำเนินการหลังจากกดข้าม เช่น ปิดโฆษณา หรือเปลี่ยนหน้า
-      alert("โฆษณาถูกข้ามแล้ว");
+      window.location.href = "https://your-link-here.com"; // ปรับลิงก์ปลายทางที่ต้องการได้เลย
     });
 
     video.play().catch(error => {
