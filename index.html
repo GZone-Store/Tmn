@@ -22,7 +22,41 @@
       height: 100%;
       object-fit: cover;
       pointer-events: none;
-      display: none; /* วิดีโอไม่แสดงทันที */
+      display: none;
+    }
+    #thumbnail {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+    #tap-to-unmute {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      cursor: pointer;
+    }
+    #countdown {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 3;
+      display: none;
     }
     #skip-btn {
       position: absolute;
@@ -34,53 +68,28 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      z-index: 10;
+      z-index: 4;
       font-size: 16px;
-      display: flex;
+      display: none;
       align-items: center;
     }
     #skip-btn i {
-      margin-right: 8px; /* ขยับไอคอนให้มีระยะห่างจากข้อความ */
-    }
-    #countdown {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 8px 12px;
-      border-radius: 5px;
-      font-size: 14px;
-      z-index: 9;
-    }
-    #tap-to-unmute {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      cursor: pointer;
+      margin-right: 8px;
     }
   </style>
 </head>
 <body>
   <div id="ad-container">
+    <img id="thumbnail" src="thumbnail.jpg" alt="หน้าปกโฆษณา" />
     <video id="ad-video" autoplay muted playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
+    <div id="tap-to-unmute" onclick="unmuteVideo()">แตะเพื่อเปิดเสียง</div>
     <div id="countdown">กำลังโหลด...</div>
     <button id="skip-btn" onclick="skipAd()">
-      <i class="fas fa-skip"></i> ข้ามโฆษณา
+      <i class="fas fa-forward"></i> ข้ามโฆษณา
     </button>
-    <div id="tap-to-unmute" onclick="unmuteVideo()">แตะเพื่อเปิดเสียง</div>
   </div>
 
   <script src="https://kit.fontawesome.com/a076d05399.js"></script>
@@ -89,8 +98,7 @@
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
     const unmuteOverlay = document.getElementById('tap-to-unmute');
-
-    // สร้างตัวแปรสำหรับเวลาเริ่มต้น
+    const thumbnail = document.getElementById('thumbnail');
     let timer;
 
     function startCountdown() {
@@ -98,14 +106,14 @@
       let timeLeft = duration;
 
       countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+      countdown.style.display = 'block';
 
-      // เริ่มนับถอยหลังเมื่อวิดีโอเริ่มเล่น
       timer = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
           clearInterval(timer);
           countdown.style.display = 'none';
-          skipBtn.style.display = 'block';
+          skipBtn.style.display = 'flex';
         } else {
           countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
         }
@@ -114,14 +122,15 @@
 
     function unmuteVideo() {
       video.muted = false;
-      video.style.display = 'block'; // แสดงวิดีโอเมื่อคลิกเพื่อเปิดเสียง
-      video.play(); // เริ่มเล่นวิดีโอ
-      startCountdown(); // เริ่มนับเวลาถอยหลัง
-      unmuteOverlay.style.display = 'none'; // ซ่อนหน้าจอที่ให้คลิกเปิดเสียง
+      thumbnail.style.display = 'none';         // ซ่อนหน้าปก
+      unmuteOverlay.style.display = 'none';     // ซ่อนปุ่มเปิดเสียง
+      video.style.display = 'block';            // แสดงวิดีโอ
+      video.play();                             // เล่นวิดีโอ
+      startCountdown();                         // เริ่มนับเวลา
     }
 
     function skipAd() {
-      window.location.href = "https://example.com"; // เปลี่ยนลิงก์ปลายทางที่นี่
+      window.location.href = "https://example.com"; // เปลี่ยนลิงก์ปลายทาง
     }
   </script>
 </body>
