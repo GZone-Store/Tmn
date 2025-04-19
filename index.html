@@ -23,9 +23,8 @@
     .ad-box {
       position: relative;
       width: 100%;
-      max-width: 600px;
-      aspect-ratio: 16 / 9;
-      border-radius: 12px;
+      max-width: 100%;
+      height: 100vh;
       overflow: hidden;
     }
     video {
@@ -39,20 +38,33 @@
       left: 10px;
       display: flex;
       gap: 10px;
+      z-index: 2;
     }
-    .mute-btn, .skip-btn {
+    .mute-btn {
       background: rgba(255,255,255,0.2);
       border: none;
       color: #fff;
-      padding: 8px 12px;
-      border-radius: 20px;
+      padding: 8px;
+      border-radius: 50%;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 18px;
     }
     .skip-btn {
       position: absolute;
       top: 10px;
       right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: not-allowed;
+      font-size: 14px;
+      z-index: 2;
+    }
+    .skip-btn.enabled {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
     }
     .countdown {
       position: absolute;
@@ -75,6 +87,7 @@
       flex-direction: column;
       align-items: center;
       padding: 16px;
+      z-index: 3;
     }
     .popup button {
       background: #fff;
@@ -87,15 +100,18 @@
       font-size: 14px;
     }
   </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body oncontextmenu="return false">
   <div class="ad-container" id="adContainer">
-    <div class="ad-box">
+    <div class="ad-box" onclick="window.open(currentAd.link)">
       <video id="adVideo" autoplay playsinline></video>
       <div class="controls">
-        <button class="mute-btn" onclick="toggleMute()" id="muteBtn">ปิดเสียง</button>
+        <button class="mute-btn" onclick="event.stopPropagation(); toggleMute()" id="muteBtn">
+          <i data-lucide="volume-2" id="muteIcon"></i>
+        </button>
       </div>
-      <button class="skip-btn" onclick="closeAd()">&times;</button>
+      <button class="skip-btn" id="skipBtn" onclick="trySkip()">ข้าม</button>
       <div class="countdown" id="countdown">0</div>
       <div class="popup" id="popup">
         <button onclick="replayAd()">ดูซ้ำ</button>
@@ -103,6 +119,7 @@
       </div>
     </div>
   </div>  <script>
+    lucide.createIcons();
     const ads = [
       { video: 'gzone-ad1.mp4', link: 'https://example.com/1' },
       { video: 'gzone-ad2.mp4', link: 'https://example.com/2' },
@@ -114,6 +131,8 @@
     const countdown = document.getElementById('countdown');
     const popup = document.getElementById('popup');
     const muteBtn = document.getElementById('muteBtn');
+    const muteIcon = document.getElementById('muteIcon');
+    const skipBtn = document.getElementById('skipBtn');
 
     video.src = currentAd.video;
     video.muted = false;
@@ -122,6 +141,8 @@
     video.addEventListener('loadedmetadata', () => {
       let duration = Math.floor(video.duration);
       countdown.textContent = `เหลือ ${duration} วินาที`;
+
+      let skipAfter = 5; // กดข้ามได้หลัง 5 วินาที
       timer = setInterval(() => {
         duration--;
         if (duration <= 0) {
@@ -129,6 +150,12 @@
           countdown.style.display = 'none';
         } else {
           countdown.textContent = `เหลือ ${duration} วินาที`;
+        }
+
+        if (video.currentTime >= skipAfter && !skipBtn.classList.contains('enabled')) {
+          skipBtn.classList.add('enabled');
+          skipBtn.style.cursor = 'pointer';
+          skipBtn.disabled = false;
         }
       }, 1000);
     });
@@ -139,7 +166,8 @@
 
     function toggleMute() {
       video.muted = !video.muted;
-      muteBtn.textContent = video.muted ? 'เปิดเสียง' : 'ปิดเสียง';
+      muteIcon.setAttribute('data-lucide', video.muted ? 'volume-x' : 'volume-2');
+      lucide.createIcons();
     }
 
     function replayAd() {
@@ -148,8 +176,10 @@
       video.play();
     }
 
-    function closeAd() {
-      document.getElementById('adContainer').style.display = 'none';
+    function trySkip() {
+      if (skipBtn.classList.contains('enabled')) {
+        document.getElementById('adContainer').style.display = 'none';
+      }
     }
   </script></body>
 </html>
