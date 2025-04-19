@@ -71,10 +71,6 @@
       z-index: 4;
       font-size: 16px;
       display: none;
-      align-items: center;
-    }
-    #skip-btn i {
-      margin-right: 8px;
     }
   </style>
 </head>
@@ -86,34 +82,30 @@
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
     <div id="tap-to-unmute" onclick="unmuteVideo()">แตะเพื่อเปิดเสียง</div>
-    <div id="countdown">กำลังโหลด...</div>
-    <button id="skip-btn" onclick="skipAd()">
-      <i class="fas fa-forward"></i> ข้ามโฆษณา
-    </button>
+    <div id="countdown">เหลือเวลา 5 วินาที</div>
+    <button id="skip-btn" onclick="skipAd()">ข้ามโฆษณา×</button>
   </div>
 
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
   <script>
     const video = document.getElementById('ad-video');
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
     const unmuteOverlay = document.getElementById('tap-to-unmute');
     const thumbnail = document.getElementById('thumbnail');
-    let timer;
+    const skipAfterSeconds = 5; // ปรับเวลาที่ต้องการให้แสดงปุ่มข้าม
 
     function startCountdown() {
-      let duration = Math.floor(video.duration);
-      let timeLeft = duration;
+      let timeLeft = skipAfterSeconds;
 
       countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
       countdown.style.display = 'block';
 
-      timer = setInterval(() => {
+      const timer = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
           clearInterval(timer);
           countdown.style.display = 'none';
-          skipBtn.style.display = 'flex';
+          skipBtn.style.display = 'block';
         } else {
           countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
         }
@@ -122,11 +114,11 @@
 
     function unmuteVideo() {
       video.muted = false;
-      thumbnail.style.display = 'none';         // ซ่อนหน้าปก
-      unmuteOverlay.style.display = 'none';     // ซ่อนปุ่มเปิดเสียง
-      video.style.display = 'block';            // แสดงวิดีโอ
-      video.play();                             // เล่นวิดีโอ
-      startCountdown();                         // เริ่มนับเวลา
+      thumbnail.style.display = 'none';
+      unmuteOverlay.style.display = 'none';
+      video.style.display = 'block';
+      video.play();
+      startCountdown();
     }
 
     function skipAd() {
