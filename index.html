@@ -3,156 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>โฆษณา GZone</title>
+  <title>โฆษณา</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       margin: 0;
       background: #000;
+      overflow: hidden;
       font-family: sans-serif;
     }
     .ad-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.95);
+      position: relative;
+      width: 100vw;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
-    }
-    .ad-box {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-      aspect-ratio: 16 / 9;
-      border-radius: 12px;
-      overflow: hidden;
+      background: #000;
     }
     video {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       pointer-events: none;
     }
-    .controls {
+    .mute-btn {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      gap: 10px;
-    }
-    .mute-btn, .skip-btn {
-      background: rgba(255,255,255,0.2);
+      top: 16px;
+      left: 16px;
+      background: rgba(0, 0, 0, 0.6);
       border: none;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 20px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       cursor: pointer;
+      z-index: 10;
+    }
+    .mute-btn img {
+      width: 20px;
+      height: 20px;
+    }
+    .timer {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: white;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 12px;
+      border-radius: 16px;
       font-size: 14px;
     }
     .skip-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-    .countdown {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.5);
+      top: 16px;
+      right: 16px;
+      background: rgba(0, 0, 0, 0.6);
       color: white;
+      border: none;
+      font-size: 20px;
       padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 13px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      z-index: 10;
     }
     .popup {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0,0,0,0.85);
-      color: #fff;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
       display: none;
-      flex-direction: column;
-      align-items: center;
-      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
     .popup button {
-      background: #fff;
-      color: #000;
-      padding: 8px 20px;
-      margin: 6px;
+      margin: 5px;
+      padding: 8px 16px;
       border: none;
-      border-radius: 20px;
-      cursor: pointer;
+      border-radius: 8px;
       font-size: 14px;
+      cursor: pointer;
+    }
+    .popup .replay {
+      background-color: #eee;
+    }
+    .popup .info {
+      background-color: #007BFF;
+      color: white;
+    }
+    .ad-label {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      color: white;
+      font-size: 12px;
+      background: rgba(0,0,0,0.5);
+      padding: 2px 6px;
+      border-radius: 4px;
     }
   </style>
 </head>
-<body oncontextmenu="return false">
-  <div class="ad-container" id="adContainer">
-    <div class="ad-box">
-      <video id="adVideo" autoplay playsinline></video>
-      <div class="controls">
-        <button class="mute-btn" onclick="toggleMute()" id="muteBtn">ปิดเสียง</button>
-      </div>
-      <button class="skip-btn" onclick="closeAd()">&times;</button>
-      <div class="countdown" id="countdown">0</div>
-      <div class="popup" id="popup">
-        <button onclick="replayAd()">ดูซ้ำ</button>
-        <button onclick="window.open(currentAd.link)">ดูข้อมูลเพิ่มเติม</button>
-      </div>
+<body>
+  <div class="ad-container">
+    <video id="adVideo" autoplay muted playsinline>
+      <source src="gzone-ad1.mp4" type="video/mp4">
+    </video>
+    <button class="mute-btn" id="muteBtn">
+      <img id="muteIcon" src="https://img.icons8.com/ios-filled/50/no-audio--v1.png" alt="mute" />
+    </button>
+    <div class="timer" id="countdown">0s</div>
+    <button class="skip-btn" id="skipBtn">×</button>
+    <div class="popup" id="popup">
+      <div style="margin-bottom: 10px;">ต้องการดำเนินการต่อหรือไม่?</div>
+      <button class="replay" onclick="replayAd()">ดูซ้ำ</button>
+      <button class="info" onclick="window.open('https://your-link.com', '_blank')">ดูข้อมูลเพิ่มเติม</button>
     </div>
+    <div class="ad-label">โฆษณา</div>
   </div>
-
   <script>
-    const ads = [
-      { video: 'gzone-ad1.mp4', link: 'https://vt.tiktok.com/ZSrbcAqwn/' },
-      { video: 'gzone-ad2.mp4', link: 'https://vt.tiktok.com/ZSrbc5Roy/' },
-      { video: 'gzone-ad3.mp4', link: 'https://vt.tiktok.com/ZSrb31XxD/' },
-    ];
-    const currentAd = ads[Math.floor(Math.random() * ads.length)];
-
     const video = document.getElementById('adVideo');
-    const countdown = document.getElementById('countdown');
-    const popup = document.getElementById('popup');
     const muteBtn = document.getElementById('muteBtn');
+    const muteIcon = document.getElementById('muteIcon');
+    const countdown = document.getElementById('countdown');
+    const skipBtn = document.getElementById('skipBtn');
+    const popup = document.getElementById('popup');
 
-    video.src = currentAd.video;
+    // เริ่มเปิดเสียงทันที
     video.muted = false;
-    let timer;
+    muteIcon.src = 'https://img.icons8.com/ios-filled/50/high-volume--v1.png';
 
+    muteBtn.onclick = () => {
+      video.muted = !video.muted;
+      muteIcon.src = video.muted
+        ? 'https://img.icons8.com/ios-filled/50/no-audio--v1.png'
+        : 'https://img.icons8.com/ios-filled/50/high-volume--v1.png';
+    };
+
+    // ห้ามกดค้างเพื่อบันทึกวิดีโอ
+    video.oncontextmenu = (e) => e.preventDefault();
+
+    // คลิกไปยังลิงก์
+    video.onclick = () => {
+      window.open('https://vt.tiktok.com/ZSrb3vvCP/', '_blank');
+    };
+
+    // จัดการนับถอยหลัง & ปุ่มข้าม
+    let interval;
     video.addEventListener('loadedmetadata', () => {
       let duration = Math.floor(video.duration);
-      countdown.textContent = `เหลือ ${duration} วินาที`;
-      timer = setInterval(() => {
+      countdown.innerText = duration + 's';
+      interval = setInterval(() => {
         duration--;
+        countdown.innerText = duration + 's';
         if (duration <= 0) {
-          clearInterval(timer);
+          clearInterval(interval);
           countdown.style.display = 'none';
-        } else {
-          countdown.textContent = `เหลือ ${duration} วินาที`;
+          skipBtn.style.display = 'block';
+          popup.style.display = 'block';
         }
       }, 1000);
     });
 
-    video.addEventListener('ended', () => {
-      popup.style.display = 'flex';
-    });
+    // ปิดข้ามโดยไม่ไปลิงก์
+    skipBtn.onclick = (e) => {
+      e.stopPropagation();
+      popup.style.display = 'block';
+    };
 
-    function toggleMute() {
-      video.muted = !video.muted;
-      muteBtn.textContent = video.muted ? 'เปิดเสียง' : 'ปิดเสียง';
-    }
-
+    // ดูซ้ำ
     function replayAd() {
-      popup.style.display = 'none';
       video.currentTime = 0;
       video.play();
-    }
-
-    function closeAd() {
-      document.getElementById('adContainer').style.display = 'none';
+      popup.style.display = 'none';
+      skipBtn.style.display = 'none';
+      countdown.style.display = 'block';
     }
   </script>
 </body>
