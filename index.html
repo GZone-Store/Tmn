@@ -40,19 +40,19 @@
     #countdown {
       position: absolute;
       top: 20px;
-      left: 20px;
+      right: 20px;
       color: white;
       background: rgba(0,0,0,0.5);
       padding: 8px 12px;
       border-radius: 5px;
       font-size: 14px;
-      z-index: 10;
+      z-index: 9;
     }
   </style>
 </head>
 <body>
   <div id="ad-container">
-    <video id="ad-video" autoplay muted playsinline>
+    <video id="ad-video" autoplay playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
@@ -84,7 +84,7 @@
     };
 
     function skipAd() {
-      window.location.href = "hnungh.com"; // เปลี่ยนลิงก์ปลายทางที่นี่
+      window.location.href = "https://example.com"; // ปรับลิงก์ปลายทางที่นี่
     }
   </script>
 </body>
