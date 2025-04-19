@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>โฆษณาวิดีโอ</title>
+  <style>
+    .ad-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .ad-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .ad-content video {
+      max-width: 100%;
+      height: auto;
+    }
+    .close-btn {
+      background-color: red;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .countdown {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ad-container" id="adContainer">
+    <div class="ad-content">
+      <video id="adVideo" width="400" controls autoplay>
+        <source src="your-ad-video.mp4" type="video/mp4">
+        เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
+      </video>
+
+      <p class="countdown" id="countdown">ข้ามใน 5 วินาที</p>
+
+      <button class="close-btn" onclick="closeAd()">ข้ามโฆษณา</button>
+    </div>
+  </div>
+
+  <script>
+    let countdownTime = 5;
+    const countdownDisplay = document.getElementById('countdown');
+
+    const countdownInterval = setInterval(() => {
+      countdownDisplay.textContent = 'ข้ามใน ' + countdownTime + ' วินาที';
+      countdownTime--;
+
+      if (countdownTime < 0) {
+        clearInterval(countdownInterval);
+        closeAd();
+      }
+    }, 1000);
+
+    function closeAd() {
+      document.getElementById('adContainer').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
