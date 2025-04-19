@@ -1,87 +1,121 @@
 <!DOCTYPE html><html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>โฆษณาวิดีโอ</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GZONE AD</title>
   <style>
     body {
       margin: 0;
       background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       overflow: hidden;
-      font-family: sans-serif;
     }
-    .ad-container {
+    #ad-container {
       position: relative;
-      max-width: 720px;
-      margin: auto;
-      top: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+      width: 360px;
+      height: 640px;
+      background: #000;
+      overflow: hidden;
+      border-radius: 12px;
     }
     video {
       width: 100%;
-      height: auto;
-      display: block;
+      height: 100%;
+      object-fit: cover;
     }
-    .controls {
+    #mute-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    #mute-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+    #skip-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      display: flex;
-      gap: 10px;
-      z-index: 10;
-    }
-    .control-btn {
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       color: white;
       border: none;
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-size: 16px;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 14px;
       cursor: pointer;
-    }
-    .skip-btn {
+      z-index: 10;
       display: none;
+    }
+    #countdown {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      background: rgba(0,0,0,0.6);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-  <div class="ad-container">
-    <video id="adVideo" autoplay muted playsinline>
-      <source src="gzone-ad1.mp4" type="video/mp4" />
-      เบราว์เซอร์ของคุณไม่รองรับวิดีโอ
+  <div id="ad-container">
+    <video id="ad-video" autoplay muted playsinline>
+      <source src="gzone-ad1.mp4" type="video/mp4">
+      Your browser does not support the video tag.
     </video>
-    <div class="controls">
-      <button id="muteBtn" class="control-btn">🔇</button>
-      <button id="skipBtn" class="control-btn skip-btn">×</button>
-    </div>
+    <button id="mute-btn">
+      <svg id="volume-icon" viewBox="0 0 24 24">
+        <path d="M3 9v6h4l5 5V4L7 9H3z" />
+      </svg>
+    </button>
+    <div id="countdown">8</div>
+    <button id="skip-btn">×</button>
   </div>  <script>
-    const video = document.getElementById('adVideo');
-    const muteBtn = document.getElementById('muteBtn');
-    const skipBtn = document.getElementById('skipBtn');
+    const video = document.getElementById('ad-video');
+    const muteBtn = document.getElementById('mute-btn');
+    const volumeIcon = document.getElementById('volume-icon');
+    const skipBtn = document.getElementById('skip-btn');
+    const countdown = document.getElementById('countdown');
 
-    // เปิดเสียงทันทีเมื่อเริ่ม
-    video.muted = false;
-    video.volume = 1.0;
+    let duration = 8;
+    countdown.textContent = duration;
 
-    // ควบคุมปิด/เปิดเสียง
+    const countdownInterval = setInterval(() => {
+      duration--;
+      countdown.textContent = duration > 0 ? duration : '';
+      if (duration <= 0) {
+        clearInterval(countdownInterval);
+        countdown.style.display = 'none';
+        skipBtn.style.display = 'block';
+      }
+    }, 1000);
+
     muteBtn.addEventListener('click', () => {
       video.muted = !video.muted;
-      muteBtn.textContent = video.muted ? '🔇' : '🔊';
+      volumeIcon.innerHTML = video.muted
+        ? '<path d="M16.5 12c0-1.77-.77-3.37-2-4.47l1.41-1.41A8.94 8.94 0 0118.5 12c0 2.21-.81 4.22-2.14 5.88l-1.41-1.41A6.978 6.978 0 0016.5 12zm-4.5 0c0-1.1.45-2.1 1.17-2.83L12.7 7.9C11.63 8.93 11 10.39 11 12s.63 3.07 1.7 4.1l.47-.47A3.978 3.978 0 0112 12zM14.5 12c0-.83-.34-1.58-.88-2.12l-1.41 1.41c.26.26.41.61.41.99s-.15.73-.41.99l1.41 1.41c.54-.54.88-1.29.88-2.12z" />'
+        : '<path d="M3 9v6h4l5 5V4L7 9H3z" />';
     });
 
-    // แสดงปุ่มข้ามเมื่อวิดีโอใกล้จบ (1 วิสุดท้าย)
-    video.addEventListener('timeupdate', () => {
-      if (video.duration - video.currentTime <= 1) {
-        skipBtn.style.display = 'inline';
-      }
-    });
-
-    // ปุ่มข้ามโฆษณา
     skipBtn.addEventListener('click', () => {
-      window.location.href = "#"; // ปรับ URL เป้าหมายได้ที่นี่
+      // ดำเนินการหลังจากกดข้าม เช่น ปิดโฆษณา หรือเปลี่ยนหน้า
+      alert("โฆษณาถูกข้ามแล้ว");
     });
 
-    // ป้องกันคลิกขวา (กันดาวน์โหลดวิดีโอ)
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    video.play().catch(error => {
+      console.warn("วิดีโอไม่สามารถเล่นอัตโนมัติได้: ", error);
+    });
   </script></body>
 </html>
