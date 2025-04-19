@@ -3,152 +3,206 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>โฆษณา</title>
+  <title>โฆษณา GZone</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
       overflow: hidden;
+      user-select: none;
     }
-
     .ad-container {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.85);
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0, 0, 0, 0.9);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
     }
-
     .ad-content {
       position: relative;
-      background: #000;
-      border-radius: 10px;
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
-
+    .video-wrapper {
+      position: relative;
+      cursor: pointer;
+    }
     video {
+      display: block;
       width: 100%;
       height: auto;
-      border-radius: 10px;
-      display: block;
     }
-
     .countdown {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      padding: 5px 12px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 4px 12px;
       border-radius: 20px;
-      font-weight: bold;
-      font-size: 16px;
-      pointer-events: none;
+      font-size: 14px;
     }
-
     .close-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
+      background: transparent;
       border: none;
       font-size: 22px;
-      padding: 4px 12px;
-      border-radius: 50%;
+      color: white;
       cursor: pointer;
       display: none;
     }
-
+    .popup {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 16px;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .popup button {
+      background: white;
+      color: #111;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .popup button:hover {
+      background: #ddd;
+    }
     .mute-btn {
       position: absolute;
       bottom: 10px;
       left: 10px;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.2);
       border: none;
+      border-radius: 50%;
+      padding: 8px;
       cursor: pointer;
     }
-
     .mute-btn svg {
-      width: 30px;
-      height: 30px;
+      width: 22px;
+      height: 22px;
       fill: white;
-    }
-
-    body {
-      -webkit-user-select: none;
-      user-select: none;
     }
   </style>
 </head>
 <body oncontextmenu="return false;">
 
-  <div class="ad-container" id="adContainer">
-    <div class="ad-content">
-      <div class="countdown" id="countdown">เหลือ 0 วินาที</div>
-      <button class="close-btn" id="closeBtn" onclick="closeAd()">×</button>
-
-      <video id="adVideo" autoplay playsinline>
-        <source src="your-ad-video.mp4.mp4" type="video/mp4">
-        ไม่สามารถแสดงวิดีโอได้
+<div class="ad-container" id="adContainer">
+  <div class="ad-content">
+    <div class="video-wrapper" onclick="openAdLink()">
+      <video id="adVideo" playsinline muted>
+        <source id="videoSource" src="" type="video/mp4">
+        ไม่สามารถเล่นวิดีโอได้
       </video>
 
-      <button class="mute-btn" id="muteBtn" onclick="toggleMute()">
-        <!-- Default: muted icon -->
-        <svg id="iconVolume" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <div class="countdown" id="countdown">เหลือ 0 วินาที</div>
+      <button class="close-btn" id="closeBtn" onclick="closeAd()">×</button>
+      <button class="mute-btn" onclick="toggleMute()">
+        <svg id="volumeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06c1.5-.74 2.5-2.26 2.5-4.03zM5 9v6h4l5 5V4l-5 5H5z" />
         </svg>
       </button>
     </div>
+
+    <div class="popup" id="popup">
+      <button onclick="replayAd()">ดูซ้ำ</button>
+      <button onclick="openAdLink()">ดูข้อมูลเพิ่มเติม</button>
+    </div>
   </div>
+</div>
 
-  <script>
-    const video = document.getElementById('adVideo');
-    const countdownEl = document.getElementById('countdown');
-    const closeBtn = document.getElementById('closeBtn');
-    const muteBtn = document.getElementById('muteBtn');
-    const iconVolume = document.getElementById('iconVolume');
+<script>
+  // รายชื่อโฆษณา + ลิงก์
+  const ads = [
+    { video: "gzone-ad.mp1", link: "https://example.com/ad1" },
+    { video: "gzone-ad.mp2", link: "https://example.com/ad2" },
+    { video: "gzone-ad.mp3", link: "https://example.com/ad3" }
+  ];
 
-    // เริ่มแบบปิดเสียง
-    video.muted = true;
-    updateIcon();
+  // สุ่มโฆษณา
+  const selectedAd = ads[Math.floor(Math.random() * ads.length)];
+  const video = document.getElementById('adVideo');
+  const videoSource = document.getElementById('videoSource');
+  const countdown = document.getElementById('countdown');
+  const closeBtn = document.getElementById('closeBtn');
+  const popup = document.getElementById('popup');
+  const volumeIcon = document.getElementById('volumeIcon');
 
-    function toggleMute() {
-      video.muted = !video.muted;
-      updateIcon();
-    }
+  videoSource.src = selectedAd.video;
+  video.load();
 
-    function updateIcon() {
-      iconVolume.innerHTML = video.muted
-        ? `<path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06c1.5-.74 2.5-2.26 2.5-4.03zM5 9v6h4l5 5V4l-5 5H5z" />` // ลำโพงปิด
-        : `<path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3l2.3-2.29a1 1 0 10-1.41-1.42L15 10.59l-2.29-2.3a1 1 0 00-1.42 1.42L13.59 12l-2.3 2.29a1 1 0 101.42 1.42L15 13.41l2.29 2.3a1 1 0 001.42-1.42L16.41 12z"/>`; // ลำโพงเปิด
-    }
+  document.body.addEventListener('click', function initAudio() {
+    video.play().then(() => {
+      video.muted = false;
+      updateVolumeIcon();
+    }).catch(e => console.log(e));
+    document.body.removeEventListener('click', initAudio);
+  });
 
-    function closeAd() {
-      document.getElementById('adContainer').style.display = 'none';
-    }
+  video.addEventListener('loadedmetadata', () => {
+    let duration = Math.floor(video.duration);
+    let remaining = duration;
 
-    // นับถอยหลังตามความยาววิดีโอ
-    video.addEventListener('loadedmetadata', () => {
-      const duration = Math.floor(video.duration);
-      let timeLeft = duration;
+    const timer = setInterval(() => {
+      if (remaining > 0) {
+        countdown.textContent = `เหลือ ${remaining} วินาที`;
+        remaining--;
+      } else {
+        clearInterval(timer);
+        countdown.style.display = 'none';
+        closeBtn.style.display = 'block';
+      }
+    }, 1000);
+  });
 
-      const countdownInterval = setInterval(() => {
-        if (timeLeft > 0) {
-          countdownEl.textContent = `เหลือ ${timeLeft} วินาที`;
-          timeLeft--;
-        } else {
-          clearInterval(countdownInterval);
-          countdownEl.style.display = 'none';
-          closeBtn.style.display = 'block';
-        }
-      }, 1000);
-    });
-  </script>
+  video.addEventListener('ended', () => {
+    popup.style.display = 'flex';
+    closeBtn.style.display = 'block';
+  });
+
+  function closeAd() {
+    document.getElementById('adContainer').style.display = 'none';
+  }
+
+  function replayAd() {
+    popup.style.display = 'none';
+    video.currentTime = 0;
+    video.play();
+  }
+
+  function openAdLink() {
+    window.open(selectedAd.link, '_blank');
+  }
+
+  function toggleMute() {
+    video.muted = !video.muted;
+    updateVolumeIcon();
+  }
+
+  function updateVolumeIcon() {
+    volumeIcon.innerHTML = video.muted
+      ? '<path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3l2.3-2.29a1 1 0 10-1.41-1.42L15 10.59l-2.29-2.3a1 1 0 00-1.42 1.42L13.59 12l-2.3 2.29a1 1 0 101.42 1.42L15 13.41l2.29 2.3a1 1 0 001.42-1.42L16.41 12z"/>'
+      : '<path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06c1.5-.74 2.5-2.26 2.5-4.03zM5 9v6h4l5 5V4l-5 5H5z" />';
+  }
+</script>
 
 </body>
 </html>
