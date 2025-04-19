@@ -27,24 +27,18 @@
       height: 100%;
       object-fit: cover;
     }
-    #mute-btn, #fullscreen-btn {
+    #mute-btn {
       position: absolute;
       top: 10px;
+      left: 10px;
       background: rgba(0, 0, 0, 0.6);
       border: none;
       border-radius: 50%;
       padding: 10px;
       cursor: pointer;
       z-index: 10;
-      transition: all 0.3s ease;
     }
-    #mute-btn {
-      left: 10px;
-    }
-    #fullscreen-btn {
-      right: 10px;
-    }
-    #mute-btn svg, #fullscreen-btn svg {
+    #mute-btn svg {
       width: 28px;
       height: 28px;
       fill: white;
@@ -53,7 +47,7 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       color: white;
       border: none;
       border-radius: 50%;
@@ -62,7 +56,7 @@
       cursor: pointer;
       z-index: 10;
       display: none;
-      transition: opacity 0.3s ease;
+      font-weight: bold;
     }
     #countdown {
       position: absolute;
@@ -75,14 +69,29 @@
       font-size: 14px;
       z-index: 10;
     }
-    #progress-bar {
+    #popup {
+      display: none;
       position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 5px;
-      background-color: #f00;
-      width: 0;
-      transition: width 0.5s ease;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      width: 70%;
+    }
+    #popup button {
+      background: #f00;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -97,14 +106,12 @@
         <path d="M3 9v6h4l5 5V4L7 9H3z" />
       </svg>
     </button>
-    <button id="fullscreen-btn">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 3h6v6H3zm18 0h-6v6h6zm-6 18h6v-6h-6zm-12 0h6v-6H3z" />
-      </svg>
-    </button>
     <div id="countdown">0</div>
     <button id="skip-btn">×</button>
-    <div id="progress-bar"></div>
+    <div id="popup">
+      <p>ขอบคุณที่ดูโฆษณา!</p>
+      <button onclick="window.location.href='https://your-link-here.com'">ดูข้อมูลเพิ่มเติม</button>
+    </div>
   </div>
   <script>
     const video = document.getElementById('ad-video');
@@ -112,8 +119,7 @@
     const volumeIcon = document.getElementById('volume-icon');
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
-    const progressBar = document.getElementById('progress-bar');
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const popup = document.getElementById('popup');
 
     video.addEventListener('loadedmetadata', () => {
       let duration = Math.floor(video.duration);
@@ -123,13 +129,13 @@
         const timeLeft = Math.ceil(video.duration - video.currentTime);
         countdown.textContent = timeLeft > 0 ? timeLeft : '';
 
-        // Update progress bar
-        progressBar.style.width = `${(video.currentTime / video.duration) * 100}%`;
-
         if (video.ended || timeLeft <= 1) {
           clearInterval(countdownInterval);
           countdown.style.display = 'none';
           skipBtn.style.display = 'block';
+          setTimeout(() => {
+            popup.style.display = 'block';
+          }, 500); // ป๊อปอัพแสดงหลังจากวิดีโอจบ
         }
       }, 500);
     });
@@ -143,16 +149,6 @@
 
     skipBtn.addEventListener('click', () => {
       window.location.href = "https://your-link-here.com"; // ปรับลิงก์ปลายทางที่ต้องการได้เลย
-    });
-
-    fullscreenBtn.addEventListener('click', () => {
-      if (video.requestFullscreen) {
-        video.requestFullscreen();
-      } else if (video.mozRequestFullScreen) {
-        video.mozRequestFullScreen();
-      } else if (video.webkitRequestFullscreen) {
-        video.webkitRequestFullscreen();
-      }
     });
 
     video.play().catch(error => {
