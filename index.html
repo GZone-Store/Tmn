@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="th">
+<!DOCTYPE html>
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,7 +10,6 @@
       margin: 0;
       background: #000;
       font-family: sans-serif;
-      overflow: hidden;
     }
     .ad-container {
       position: fixed;
@@ -23,18 +23,16 @@
     }
     .ad-box {
       position: relative;
-      width: 90vw;
-      max-width: 800px;
-      height: 50vh;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
       overflow: hidden;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
     video {
       width: 100%; height: 100%;
       object-fit: cover;
       pointer-events: none;
-      border-radius: 16px;
     }
     .controls {
       position: absolute;
@@ -42,33 +40,20 @@
       left: 10px;
       display: flex;
       gap: 10px;
-      z-index: 2;
     }
-    .mute-btn {
+    .mute-btn, .skip-btn {
       background: rgba(255,255,255,0.2);
       border: none;
       color: #fff;
-      padding: 8px;
-      border-radius: 50%;
+      padding: 8px 12px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 14px;
     }
     .skip-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 50%;
-      cursor: not-allowed;
-      font-size: 20px;
-      z-index: 2;
-    }
-    .skip-btn.enabled {
-      cursor: pointer;
-      background: rgba(255, 255, 255, 0.2);
     }
     .countdown {
       position: absolute;
@@ -91,7 +76,6 @@
       flex-direction: column;
       align-items: center;
       padding: 16px;
-      z-index: 3;
     }
     .popup button {
       background: #fff;
@@ -104,30 +88,28 @@
       font-size: 14px;
     }
   </style>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body oncontextmenu="return false" onkeydown="return false" onkeyup="return false">
+<body oncontextmenu="return false">
   <div class="ad-container" id="adContainer">
-    <div class="ad-box" onclick="window.open(currentAd.link)">
+    <div class="ad-box">
       <video id="adVideo" autoplay playsinline></video>
       <div class="controls">
-        <button class="mute-btn" onclick="event.stopPropagation(); toggleMute()" id="muteBtn">
-          <i data-lucide="volume-2" id="muteIcon"></i>
-        </button>
+        <button class="mute-btn" onclick="toggleMute()" id="muteBtn">ปิดเสียง</button>
       </div>
-      <button class="skip-btn" id="skipBtn" onclick="trySkip()">×</button>
+      <button class="skip-btn" onclick="closeAd()">&times;</button>
       <div class="countdown" id="countdown">0</div>
       <div class="popup" id="popup">
         <button onclick="replayAd()">ดูซ้ำ</button>
         <button onclick="window.open(currentAd.link)">ดูข้อมูลเพิ่มเติม</button>
       </div>
     </div>
-  </div>  <script>
-    lucide.createIcons();
+  </div>
+
+  <script>
     const ads = [
-      { video: 'gzone-ad1.mp4', link: 'https://example.com/1' },
-      { video: 'gzone-ad2.mp4', link: 'https://example.com/2' },
-      { video: 'gzone-ad3.mp4', link: 'https://example.com/3' },
+      { video: 'gzone-ad1.mp4', link: 'https://vt.tiktok.com/ZSrbcAqwn/' },
+      { video: 'gzone-ad2.mp4', link: 'https://vt.tiktok.com/ZSrbc5Roy/' },
+      { video: 'gzone-ad3.mp4', link: 'https://vt.tiktok.com/ZSrb31XxD/' },
     ];
     const currentAd = ads[Math.floor(Math.random() * ads.length)];
 
@@ -135,8 +117,6 @@
     const countdown = document.getElementById('countdown');
     const popup = document.getElementById('popup');
     const muteBtn = document.getElementById('muteBtn');
-    const muteIcon = document.getElementById('muteIcon');
-    const skipBtn = document.getElementById('skipBtn');
 
     video.src = currentAd.video;
     video.muted = false;
@@ -145,7 +125,6 @@
     video.addEventListener('loadedmetadata', () => {
       let duration = Math.floor(video.duration);
       countdown.textContent = `เหลือ ${duration} วินาที`;
-
       timer = setInterval(() => {
         duration--;
         if (duration <= 0) {
@@ -159,15 +138,11 @@
 
     video.addEventListener('ended', () => {
       popup.style.display = 'flex';
-      skipBtn.classList.add('enabled');
-      skipBtn.style.cursor = 'pointer';
-      skipBtn.disabled = false;
     });
 
     function toggleMute() {
       video.muted = !video.muted;
-      muteIcon.setAttribute('data-lucide', video.muted ? 'volume-x' : 'volume-2');
-      lucide.createIcons();
+      muteBtn.textContent = video.muted ? 'เปิดเสียง' : 'ปิดเสียง';
     }
 
     function replayAd() {
@@ -176,10 +151,9 @@
       video.play();
     }
 
-    function trySkip() {
-      if (skipBtn.classList.contains('enabled')) {
-        document.getElementById('adContainer').style.display = 'none';
-      }
+    function closeAd() {
+      document.getElementById('adContainer').style.display = 'none';
     }
-  </script></body>
+  </script>
+</body>
 </html>
