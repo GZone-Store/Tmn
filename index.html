@@ -61,7 +61,7 @@
     #skip-btn {
       position: absolute;
       top: 20px;
-      right: 20px; /* ปรับให้อยู่ด้านขวา */
+      right: 20px;
       background: transparent;
       border: none;
       display: none;
@@ -95,35 +95,37 @@
     const unmuteOverlay = document.getElementById('tap-to-unmute');
     const thumbnail = document.getElementById('thumbnail');
 
+    // เตรียม onloadedmetadata ล่วงหน้า
+    video.onloadedmetadata = function () {
+      let duration = Math.floor(video.duration);
+      let timeLeft = duration;
+
+      countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+      countdown.style.display = 'block';
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          countdown.style.display = 'none';
+          skipBtn.style.display = 'block';
+        } else {
+          countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+        }
+      }, 1000);
+    };
+
     function unmuteVideo() {
       video.muted = false;
       thumbnail.style.display = 'none';
       unmuteOverlay.style.display = 'none';
       video.style.display = 'block';
+      video.currentTime = 0;
       video.play();
-
-      video.onloadedmetadata = function () {
-        let duration = Math.floor(video.duration);
-        let timeLeft = duration;
-
-        countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-        countdown.style.display = 'block';
-
-        const timer = setInterval(() => {
-          timeLeft--;
-          if (timeLeft <= 0) {
-            clearInterval(timer);
-            countdown.style.display = 'none';
-            skipBtn.style.display = 'block'; // แสดงปุ่มหลังนับถอยหลังจบ
-          } else {
-            countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-          }
-        }, 1000);
-      };
     }
 
     function skipAd() {
-      window.location.href = "https://example.com"; // ลิงก์ปลายทาง
+      window.location.href = "https://example.com";
     }
   </script>
 </body>
