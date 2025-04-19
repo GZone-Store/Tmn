@@ -48,25 +48,42 @@
       font-size: 14px;
       z-index: 9;
     }
+    #tap-to-unmute {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="ad-container">
-    <video id="ad-video" autoplay playsinline>
+    <video id="ad-video" autoplay muted playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
     <div id="countdown">กำลังโหลด...</div>
     <button id="skip-btn" onclick="skipAd()">× ข้ามโฆษณา</button>
+    <div id="tap-to-unmute" onclick="unmuteVideo()">แตะเพื่อเปิดเสียง</div>
   </div>
 
   <script>
     const video = document.getElementById('ad-video');
     const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
+    const unmuteOverlay = document.getElementById('tap-to-unmute');
 
     video.onloadedmetadata = function () {
-      let duration = Math.floor(video.duration); // วินาที
+      let duration = Math.floor(video.duration);
       let timeLeft = duration;
 
       countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
@@ -84,7 +101,13 @@
     };
 
     function skipAd() {
-      window.location.href = "https://example.com"; // ปรับลิงก์ปลายทางที่นี่
+      window.location.href = "https://example.com"; // เปลี่ยนลิงก์ปลายทางที่นี่
+    }
+
+    function unmuteVideo() {
+      video.muted = false;
+      video.play();
+      unmuteOverlay.style.display = 'none';
     }
   </script>
 </body>
