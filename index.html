@@ -95,15 +95,30 @@
     const unmuteOverlay = document.getElementById('tap-to-unmute');
     const thumbnail = document.getElementById('thumbnail');
 
-    // เตรียม onloadedmetadata ล่วงหน้า
-    video.onloadedmetadata = function () {
-      let duration = Math.floor(video.duration);
+    let timer;
+
+    function unmuteVideo() {
+      video.style.display = 'block';
+      thumbnail.style.display = 'none';
+      unmuteOverlay.style.display = 'none';
+      video.muted = false;
+      video.currentTime = 0;
+      video.play();
+    }
+
+    function skipAd() {
+      window.location.href = "https://example.com"; // เปลี่ยน URL ตามต้องการ
+    }
+
+    // เริ่มนับถอยหลังเมื่อวิดีโอเริ่มเล่นจริง
+    video.onplay = function () {
+      const duration = Math.floor(video.duration);
       let timeLeft = duration;
 
       countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
       countdown.style.display = 'block';
 
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
           clearInterval(timer);
@@ -115,18 +130,13 @@
       }, 1000);
     };
 
-    function unmuteVideo() {
-      video.muted = false;
-      thumbnail.style.display = 'none';
-      unmuteOverlay.style.display = 'none';
+    // โหลดแล้วเล่นวิดีโอแบบ mute และแสดงทันที
+    window.onload = () => {
       video.style.display = 'block';
-      video.currentTime = 0;
-      video.play();
-    }
-
-    function skipAd() {
-      window.location.href = "https://example.com";
-    }
+      video.play().catch(() => {
+        console.log("Autoplay ถูกบล็อกโดยเบราว์เซอร์");
+      });
+    };
   </script>
 </body>
 </html>
