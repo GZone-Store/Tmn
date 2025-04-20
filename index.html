@@ -11,6 +11,7 @@
       height: 100%;
       background: black;
       overflow: hidden;
+      font-family: sans-serif;
     }
     #ad-container {
       position: relative;
@@ -38,7 +39,7 @@
       height: 100%;
       background: rgba(0,0,0,0.5);
       color: white;
-      font-size: 20px;
+      font-size: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -50,8 +51,8 @@
       top: 20px;
       right: 20px;
       color: white;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 10px;
       border-radius: 5px;
       font-size: 14px;
       z-index: 3;
@@ -61,37 +62,31 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      background: transparent;
+      background: rgba(0, 0, 0, 0.6);
       border: none;
-      display: none;
+      color: white;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 5px;
       cursor: pointer;
       z-index: 4;
-    }
-    #skip-btn img {
-      width: 40px;
-      height: 40px;
+      display: none;
     }
     #mute-toggle {
       position: absolute;
       bottom: 20px;
       right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 20px;
+      border-radius: 50%;
       width: 44px;
       height: 44px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 50%;
       display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 5;
-      transition: background 0.2s;
-    }
-    #mute-toggle:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    #mute-toggle img {
-      width: 24px;
-      height: 24px;
     }
   </style>
 </head>
@@ -104,12 +99,8 @@
     </video>
     <div id="tap-to-unmute" onclick="startVideo(true)">แตะเพื่อเปิดเสียง</div>
     <div id="countdown">เหลือเวลา 0 วินาที</div>
-    <button id="skip-btn" onclick="skipAd()">
-      <img src="skip-icon.png" alt="ข้ามโฆษณา" />
-    </button>
-    <div id="mute-toggle" onclick="toggleMute()">
-      <img id="mute-icon" src="volume-off.png" alt="ปิด/เปิดเสียง">
-    </div>
+    <button id="skip-btn" onclick="skipAd()">ข้ามโฆษณา</button>
+    <div id="mute-toggle" onclick="toggleMute()">🔈</div>
   </div>
 
   <script>
@@ -119,16 +110,12 @@
     const unmuteOverlay = document.getElementById('tap-to-unmute');
     const thumbnail = document.getElementById('thumbnail');
     const muteToggle = document.getElementById('mute-toggle');
-    const muteIcon = document.getElementById('mute-icon');
 
     let started = false;
     let timer;
 
-    // ถ้าไม่แตะใน 5 วิ ให้เริ่มเล่นแบบ mute
     setTimeout(() => {
-      if (!started) {
-        startVideo(false);
-      }
+      if (!started) startVideo(false); // เริ่มแบบปิดเสียงหลัง 5 วิ
     }, 5000);
 
     function startVideo(withSound) {
@@ -136,42 +123,48 @@
       started = true;
 
       video.muted = !withSound;
-      unmuteOverlay.style.display = 'none';
-      thumbnail.style.display = 'none';
       video.style.display = 'block';
+      thumbnail.style.display = 'none';
+      unmuteOverlay.style.display = 'none';
+
       video.currentTime = 0;
-
       video.play().then(() => {
-        // เริ่มแสดง mute toggle และ countdown
         muteToggle.style.display = 'flex';
-        muteIcon.src = video.muted ? 'volume-off.png' : 'volume-on.png';
-
-        let timeLeft = Math.floor(video.duration || 15);
-        countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-        countdown.style.display = 'block';
-
-        timer = setInterval(() => {
-          timeLeft--;
-          if (timeLeft <= 0) {
-            clearInterval(timer);
-            countdown.style.display = 'none';
-            skipBtn.style.display = 'block';
-          } else {
-            countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-          }
-        }, 1000);
+        updateMuteIcon();
+        showCountdown();
       }).catch(err => {
-        console.log('วิดีโอเล่นล้มเหลว:', err);
+        console.error("เล่นวิดีโอล้มเหลว:", err);
       });
+    }
+
+    function showCountdown() {
+      let timeLeft = Math.floor(video.duration || 15);
+      countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+      countdown.style.display = 'block';
+
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          countdown.style.display = 'none';
+          skipBtn.style.display = 'block';
+        } else {
+          countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+        }
+      }, 1000);
     }
 
     function toggleMute() {
       video.muted = !video.muted;
-      muteIcon.src = video.muted ? 'volume-off.png' : 'volume-on.png';
+      updateMuteIcon();
+    }
+
+    function updateMuteIcon() {
+      muteToggle.textContent = video.muted ? "🔇" : "🔈";
     }
 
     function skipAd() {
-      window.location.href = "https://example.com"; // เปลี่ยน URL ได้
+      window.location.href = "https://example.com"; // เปลี่ยน URL ได้เลย
     }
   </script>
 </body>
