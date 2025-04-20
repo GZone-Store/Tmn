@@ -4,15 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>โฆษณา</title>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500&display=swap" rel="stylesheet">
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      background: black;
       height: 100%;
+      background: black;
       overflow: hidden;
-      font-family: 'Prompt', sans-serif;
     }
     #ad-container {
       position: relative;
@@ -23,7 +21,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none;
       display: none;
     }
     #thumbnail {
@@ -51,7 +48,7 @@
     #countdown {
       position: absolute;
       top: 20px;
-      left: 20px;
+      right: 20px;
       color: white;
       background: rgba(0, 0, 0, 0.5);
       padding: 8px 12px;
@@ -63,75 +60,56 @@
     #skip-btn {
       position: absolute;
       top: 20px;
-      right: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background-color: rgba(255, 255, 255, 0.9);
+      left: 20px;
+      background: transparent;
       border: none;
-      border-radius: 12px;
-      padding: 8px 16px;
-      font-size: 20px;
-      color: #5A29A7;
-      font-weight: bold;
+      display: none;
       cursor: pointer;
       z-index: 4;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      display: none;
-      transition: background-color 0.3s ease;
     }
-    #skip-btn:hover {
-      background-color: rgba(255, 255, 255, 1);
+    #skip-btn img {
+      width: 40px;
+      height: 40px;
     }
-    #skip-btn svg {
-      width: 24px;
-      height: 24px;
-    }
-    #mute-toggle-btn {
+    #mute-toggle {
       position: absolute;
       bottom: 20px;
       right: 20px;
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
+      width: 44px;
+      height: 44px;
+      background: rgba(0, 0, 0, 0.5);
       border-radius: 50%;
-      width: 48px;
-      height: 48px;
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 4;
       cursor: pointer;
+      z-index: 5;
+      transition: background 0.2s;
     }
-    #mute-toggle-btn img {
-      width: 28px;
-      height: 28px;
+    #mute-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    #mute-toggle img {
+      width: 24px;
+      height: 24px;
     }
   </style>
 </head>
 <body>
   <div id="ad-container">
     <img id="thumbnail" src="thumbnail.jpg" alt="หน้าปกโฆษณา" />
-    <video id="ad-video" muted playsinline>
+    <video id="ad-video" playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
-    <div id="tap-to-unmute" onclick="playAdVideo(true)">แตะเพื่อเปิดเสียง</div>
-    <div id="countdown">กำลังโหลด...</div>
-
-    <!-- ปุ่มข้ามโฆษณา -->
+    <div id="tap-to-unmute" onclick="startVideo(true)">แตะเพื่อเปิดเสียง</div>
+    <div id="countdown">เหลือเวลา 0 วินาที</div>
     <button id="skip-btn" onclick="skipAd()">
-      <span>ข้ามโฆษณา</span>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill="none" stroke="#5A29A7" stroke-width="2"/>
-        <line x1="8" y1="8" x2="16" y2="16" stroke="#5A29A7" stroke-width="2"/>
-        <line x1="16" y1="8" x2="8" y2="16" stroke="#5A29A7" stroke-width="2"/>
-      </svg>
+      <img src="skip-icon.png" alt="ข้ามโฆษณา" />
     </button>
-
-    <!-- ปุ่มเปิด/ปิดเสียง -->
-    <button id="mute-toggle-btn" onclick="toggleMute()">
-      <img id="mute-icon" src="volume-on.png" alt="เสียงเปิด" />
-    </button>
+    <div id="mute-toggle" onclick="toggleMute()">
+      <img id="mute-icon" src="volume-off.png" alt="ปิด/เปิดเสียง">
+    </div>
   </div>
 
   <script>
@@ -140,65 +118,61 @@
     const countdown = document.getElementById('countdown');
     const unmuteOverlay = document.getElementById('tap-to-unmute');
     const thumbnail = document.getElementById('thumbnail');
-    const muteToggleBtn = document.getElementById('mute-toggle-btn');
+    const muteToggle = document.getElementById('mute-toggle');
     const muteIcon = document.getElementById('mute-icon');
 
-    let hasStarted = false;
+    let started = false;
     let timer;
 
-    function playAdVideo(unmute = false) {
-      if (hasStarted) return;
-      hasStarted = true;
+    // ถ้าไม่แตะใน 5 วิ ให้เริ่มเล่นแบบ mute
+    setTimeout(() => {
+      if (!started) {
+        startVideo(false);
+      }
+    }, 5000);
 
-      video.style.display = 'block';
-      thumbnail.style.display = 'none';
+    function startVideo(withSound) {
+      if (started) return;
+      started = true;
+
+      video.muted = !withSound;
       unmuteOverlay.style.display = 'none';
-
-      video.muted = !unmute;
+      thumbnail.style.display = 'none';
+      video.style.display = 'block';
       video.currentTime = 0;
 
-      muteToggleBtn.style.display = 'flex';
-      muteIcon.src = video.muted ? 'volume-off.png' : 'volume-on.png';
+      video.play().then(() => {
+        // เริ่มแสดง mute toggle และ countdown
+        muteToggle.style.display = 'flex';
+        muteIcon.src = video.muted ? 'volume-off.png' : 'volume-on.png';
 
-      video.addEventListener('loadedmetadata', () => {
-        startCountdown(video.duration || 15);
-        video.play();
+        let timeLeft = Math.floor(video.duration || 15);
+        countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+        countdown.style.display = 'block';
+
+        timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            countdown.style.display = 'none';
+            skipBtn.style.display = 'block';
+          } else {
+            countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
+          }
+        }, 1000);
+      }).catch(err => {
+        console.log('วิดีโอเล่นล้มเหลว:', err);
       });
-    }
-
-    function startCountdown(duration) {
-      let timeLeft = Math.floor(duration);
-      countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-      countdown.style.display = 'block';
-
-      timer = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          countdown.style.display = 'none';
-          skipBtn.style.display = 'flex';
-        } else {
-          countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-        }
-      }, 1000);
     }
 
     function toggleMute() {
       video.muted = !video.muted;
       muteIcon.src = video.muted ? 'volume-off.png' : 'volume-on.png';
-      muteIcon.alt = video.muted ? 'เสียงปิด' : 'เสียงเปิด';
     }
 
     function skipAd() {
-      window.location.href = "https://example.com"; // เปลี่ยน URL ได้ตามต้องการ
+      window.location.href = "https://example.com"; // เปลี่ยน URL ได้
     }
-
-    // เล่นอัตโนมัติหลัง 3 วินาที ถ้าไม่แตะ
-    setTimeout(() => {
-      if (!hasStarted) {
-        playAdVideo(false);
-      }
-    }, 3000);
   </script>
 </body>
 </html>
