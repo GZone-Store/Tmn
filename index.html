@@ -77,7 +77,7 @@
 <body>
   <div id="ad-container">
     <img id="thumbnail" src="thumbnail.jpg" alt="หน้าปกโฆษณา" />
-    <video id="ad-video" autoplay muted playsinline>
+    <video id="ad-video" muted playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
       วิดีโอของคุณไม่สามารถเล่นได้
     </video>
@@ -98,21 +98,17 @@
     let timer;
 
     function unmuteVideo() {
+      // แสดงวิดีโอ
       video.style.display = 'block';
       thumbnail.style.display = 'none';
       unmuteOverlay.style.display = 'none';
+
       video.muted = false;
       video.currentTime = 0;
       video.play();
-    }
 
-    function skipAd() {
-      window.location.href = "https://example.com"; // เปลี่ยน URL ตามต้องการ
-    }
-
-    // เริ่มนับถอยหลังเมื่อวิดีโอเริ่มเล่นจริง
-    video.onplay = function () {
-      const duration = Math.floor(video.duration);
+      // เริ่มนับถอยหลังหลังวิดีโอเริ่ม
+      const duration = Math.floor(video.duration || 0);
       let timeLeft = duration;
 
       countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
@@ -128,15 +124,11 @@
           countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
         }
       }, 1000);
-    };
+    }
 
-    // โหลดแล้วเล่นวิดีโอแบบ mute และแสดงทันที
-    window.onload = () => {
-      video.style.display = 'block';
-      video.play().catch(() => {
-        console.log("Autoplay ถูกบล็อกโดยเบราว์เซอร์");
-      });
-    };
+    function skipAd() {
+      window.location.href = "https://example.com"; // เปลี่ยน URL ตามต้องการ
+    }
   </script>
 </body>
 </html>
