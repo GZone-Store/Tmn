@@ -5,179 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>โฆษณา</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: black;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; background: black; font-family: sans-serif; overflow: hidden; }
 
-    #ad-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: none;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
-    }
-
-    #thumbnail {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-    }
+    #ad-container { position: relative; width: 100%; height: 100vh; }
+    video, img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    video { display: none; pointer-events: none; user-select: none; }
 
     #tap-to-unmute {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      position: absolute; inset: 0;
       background: rgba(0,0,0,0.5);
-      color: white;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-      cursor: pointer;
+      color: white; font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 2;
     }
 
-    #countdown {
-      position: absolute;
-      top: 20px;
-      right: 100px;
-      color: white;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-size: 14px;
-      z-index: 3;
-      display: none;
+    #countdown, #skip-btn {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(0,0,0,0.6);
+      color: white; font-size: 14px;
+      padding: 6px 12px; border-radius: 5px; z-index: 4;
     }
 
-    #skip-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      color: white;
-      font-size: 14px;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 4;
-      display: none;
-    }
+    #skip-btn { border: none; cursor: pointer; display: none; }
 
     #mute-toggle {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.6);
-      color: white;
-      font-size: 20px;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 5;
+      position: absolute; bottom: 20px; right: 20px;
+      background: rgba(0,0,0,0.6);
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 5;
     }
+
+    svg { width: 24px; height: 24px; fill: white; }
   </style>
 </head>
 <body>
   <div id="ad-container">
-    <img id="thumbnail" src="thumbnail.jpg" alt="หน้าปกโฆษณา" />
-    <video id="ad-video" playsinline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback">
+    <img id="thumbnail" src="thumbnail.jpg" alt="thumbnail" />
+    <video id="ad-video" playsinline>
       <source src="gzone-ad1.mp4" type="video/mp4" />
-      วิดีโอของคุณไม่สามารถเล่นได้
     </video>
+
     <div id="tap-to-unmute" onclick="startVideo(true)">แตะเพื่อเปิดเสียง</div>
     <div id="countdown">เหลือเวลา 10 วินาที</div>
     <button id="skip-btn" onclick="skipAd()">ข้ามโฆษณา</button>
-    <div id="mute-toggle" onclick="toggleMute()">🔈</div>
+
+    <div id="mute-toggle" onclick="toggleMute()">
+      <svg><use id="sound-icon" xlink:href="#icon-unmute"/></svg>
+    </div>
   </div>
+
+  <svg style="display: none;">
+    <defs>
+      <symbol id="icon-unmute" viewBox="0 0 24 24">
+        <path d="M5 9v6h4l5 5V4l-5 5H5zM16.5 12a4.5 4.5 0 0 0-1.5-3.36v6.72A4.5 4.5 0 0 0 16.5 12z"/>
+      </symbol>
+      <symbol id="icon-mute" viewBox="0 0 24 24">
+        <path d="M16.5 12a4.5 4.5 0 0 1-1.5 3.36V8.64A4.5 4.5 0 0 1 16.5 12zM19 3l-2 2-2 2-2 2-2-2-2-2-2-2L3 5l6 6-6 6 2 2 6-6 6 6 2-2-6-6 6-6z"/>
+      </symbol>
+    </defs>
+  </svg>
 
   <script>
     const video = document.getElementById('ad-video');
-    const skipBtn = document.getElementById('skip-btn');
     const countdown = document.getElementById('countdown');
-    const unmuteOverlay = document.getElementById('tap-to-unmute');
+    const skipBtn = document.getElementById('skip-btn');
     const thumbnail = document.getElementById('thumbnail');
-    const muteToggle = document.getElementById('mute-toggle');
+    const tapToUnmute = document.getElementById('tap-to-unmute');
+    const soundIcon = document.getElementById('sound-icon');
 
-    let started = false;
-    let timer;
-
-    setTimeout(() => {
-      if (!started) startVideo(false); // เริ่มแบบปิดเสียงหลัง 5 วิ
-    }, 5000);
+    let seconds = 10;
+    let interval;
 
     function startVideo(withSound) {
-      if (started) return;
-      started = true;
-
-      video.muted = !withSound;
-      video.style.display = 'block';
+      tapToUnmute.style.display = 'none';
       thumbnail.style.display = 'none';
-      unmuteOverlay.style.display = 'none';
+      video.style.display = 'block';
+      video.muted = !withSound;
+      video.play();
+      soundIcon.setAttribute('xlink:href', video.muted ? '#icon-mute' : '#icon-unmute');
 
-      video.currentTime = 0;
-      video.play().then(() => {
-        muteToggle.style.display = 'flex';
-        updateMuteIcon();
-        showCountdown();
-      }).catch(err => {
-        console.error("เล่นวิดีโอล้มเหลว:", err);
-      });
-    }
-
-    function showCountdown() {
-      countdown.style.display = 'block';
-      skipBtn.style.display = 'none';
-
-      timer = setInterval(() => {
-        const timeLeft = Math.ceil(video.duration - video.currentTime);
-        const played = Math.floor(video.currentTime);
-
-        countdown.textContent = `เหลือเวลา ${timeLeft} วินาที`;
-
-        if (played >= 10) {
-          clearInterval(timer);
-          countdown.style.display = 'none';
-          skipBtn.style.display = 'block';
+      interval = setInterval(() => {
+        if (!video.paused) {
+          seconds--;
+          countdown.textContent = `เหลือเวลา ${seconds} วินาที`;
+          if (seconds <= 0) {
+            clearInterval(interval);
+            countdown.style.display = 'none';
+            skipBtn.style.display = 'block';
+          }
         }
-      }, 500);
+      }, 1000);
     }
 
     function toggleMute() {
       video.muted = !video.muted;
-      updateMuteIcon();
-    }
-
-    function updateMuteIcon() {
-      muteToggle.textContent = video.muted ? "🔇" : "🔈";
+      soundIcon.setAttribute('xlink:href', video.muted ? '#icon-mute' : '#icon-unmute');
     }
 
     function skipAd() {
-      window.location.href = "https://example.com"; // เปลี่ยน URL ได้เลย
+      alert("ข้ามโฆษณาแล้ว"); // เปลี่ยนเป็น redirect จริงในเว็บคุณ
     }
   </script>
 </body>
