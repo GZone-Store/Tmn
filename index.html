@@ -7,11 +7,12 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body, html { height: 100%; background: black; font-family: sans-serif; overflow: hidden; }
-
     #ad-container { position: relative; width: 100%; height: 100vh; }
-    video, img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    video { display: none; pointer-events: none; user-select: none; }
-
+    video, img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      user-select: none; -webkit-user-drag: none; pointer-events: auto;
+    }
+    video { display: none; }
     #tap-to-unmute {
       position: absolute; inset: 0;
       background: rgba(0,0,0,0.5);
@@ -19,16 +20,13 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; z-index: 2;
     }
-
     #countdown, #skip-btn {
       position: absolute; top: 20px; right: 20px;
       background: rgba(0,0,0,0.6);
       color: white; font-size: 14px;
       padding: 6px 12px; border-radius: 5px; z-index: 4;
     }
-
     #skip-btn { border: none; cursor: pointer; display: none; }
-
     #mute-toggle {
       position: absolute; bottom: 20px; right: 20px;
       background: rgba(0,0,0,0.6);
@@ -36,11 +34,10 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; z-index: 5;
     }
-
     svg { width: 24px; height: 24px; fill: white; }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false">
   <div id="ad-container">
     <img id="thumbnail" src="thumbnail.jpg" alt="thumbnail" />
     <video id="ad-video" playsinline>
@@ -48,7 +45,7 @@
     </video>
 
     <div id="tap-to-unmute" onclick="startVideo(true)">แตะเพื่อเปิดเสียง</div>
-    <div id="countdown">เหลือเวลา 10 วินาที</div>
+    <div id="countdown">เหลือเวลา ... วินาที</div>
     <button id="skip-btn" onclick="skipAd()">ข้ามโฆษณา</button>
 
     <div id="mute-toggle" onclick="toggleMute()">
@@ -75,7 +72,6 @@
     const tapToUnmute = document.getElementById('tap-to-unmute');
     const soundIcon = document.getElementById('sound-icon');
 
-    let seconds = 10;
     let interval;
 
     function startVideo(withSound) {
@@ -86,17 +82,22 @@
       video.play();
       soundIcon.setAttribute('xlink:href', video.muted ? '#icon-mute' : '#icon-unmute');
 
-      interval = setInterval(() => {
-        if (!video.paused) {
-          seconds--;
-          countdown.textContent = `เหลือเวลา ${seconds} วินาที`;
-          if (seconds <= 0) {
-            clearInterval(interval);
-            countdown.style.display = 'none';
-            skipBtn.style.display = 'block';
+      video.addEventListener('loadedmetadata', () => {
+        let seconds = Math.floor(video.duration);
+        countdown.textContent = `เหลือเวลา ${seconds} วินาที`;
+
+        interval = setInterval(() => {
+          if (!video.paused && seconds > 0) {
+            seconds--;
+            countdown.textContent = `เหลือเวลา ${seconds} วินาที`;
+            if (seconds <= 0) {
+              clearInterval(interval);
+              countdown.style.display = 'none';
+              skipBtn.style.display = 'block';
+            }
           }
-        }
-      }, 1000);
+        }, 1000);
+      });
     }
 
     function toggleMute() {
@@ -105,8 +106,12 @@
     }
 
     function skipAd() {
-      alert("ข้ามโฆษณาแล้ว"); // เปลี่ยนเป็น redirect จริงในเว็บคุณ
+      window.location.href = "main.html"; // ลิงก์ที่ต้องการให้ไปหลังข้ามโฆษณา
     }
+
+    video.addEventListener('click', () => {
+      window.open("https://sponsor-link.com", "_blank"); // ลิงก์โฆษณา
+    });
   </script>
 </body>
 </html>
